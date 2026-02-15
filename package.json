@@ -1,14 +1,18 @@
 {
-  "name": "rwa-server-api",
+  "name": "rwa-sarver-api",
   "version": "1.0.0",
   "type": "module",
   "main": "sarver.js",
   "scripts": {
-    "start": "node sarver.js"
+    "start": "node sarver.js",
+    "build": "npm install"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "node-fetch": "^3.3.2"
+    "axios": "^1.6.0",
+    "cors": "^2.8.5"
+  },
+  "engines": {
+    "node": "22.x"
   }
 }
