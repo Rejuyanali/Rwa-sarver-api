@@ -1,114 +1,166 @@
-import express from "express";
-import fetch from "node-fetch";
-import cors from "cors";
+// server.js
+import express from 'express';
+import axios from 'axios';
+import cors from 'cors';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import fs from 'fs';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
-app.use(cors());
-
 const PORT = 5000;
 
-const API_BASE = "https://rozgarapinew.teachx.in";
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-const TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjQ3NDc5NjkiLCJlbWFpbCI6ImFzaGVlc2guc2hpa2FyaXlhLm1haGFwdXJAZ21haWwuY29tIiwidGltZXN0YW1wIjoxNzY3MTM1NTczLCJ0ZW5hbnRUeXBlIjoidXNlciIsInRlbmFudE5hbWUiOiJyb3pnYXJfZGIiLCJ0ZW5hbnRJZCI6IiIsImRpc3Bvc2FibGUiOmZhbHNlfQ.RPp8T4TeHtPQo_bA3WaQ_xLi_h-HKpRSDZ-q_oP0n5A";
-const USER_ID = "4747969";
+// Base URL for the external API
+const BASE_URL = 'https://spidyuniverserwa.vercel.app/api/proxy';
 
-app.get("/api", async (req, res) => {
-  const { action, ...params } = req.query;
-
-  let url;
-
-  switch (action) {
-    case "batches":
-      url = `${API_BASE}/get/mycoursev2?userid=${USER_ID}`;
-      break;
-
-    case "subjects":
-      if (!params.courseid) {
-        return res.status(400).json({ error: "courseid parameter is required" });
-      }
-      url = `${API_BASE}/get/allsubjectfrmlivecourseclass?courseid=${params.courseid}&start=-1`;
-      break;
-
-    case "classes":
-      if (!params.courseid || !params.subjectid) {
-        return res.status(400).json({ error: "courseid and subjectid parameters are required" });
-      }
-      url = `${API_BASE}/get/alltopicfrmlivecourseclass?courseid=${params.courseid}&subjectid=${params.subjectid}&start=-1`;
-      break;
-
-    case "content":
-      if (!params.courseid || !params.subjectid || !params.topicid) {
-        return res.status(400).json({ error: "courseid, subjectid and topicid parameters are required" });
-      }
-      url = `${API_BASE}/get/livecourseclassbycoursesubtopconceptapiv3?courseid=${params.courseid}&subjectid=${params.subjectid}&topicid=${params.topicid}&start=0`;
-      break;
-
-    case "videoDetails":
-      if (!params.course_id || !params.video_id) {
-        return res.status(400).json({ error: "course_id and video_id parameters are required" });
-      }
-      url = `${API_BASE}/get/fetchVideoDetailsById?course_id=${params.course_id}&video_id=${params.video_id}&ytflag=0&folder_wise_course=0`;
-      break;
-
-    default:
-      return res.status(400).json({ error: "Invalid action" });
-  }
-
-  // Log the URL for debugging (like error_log in PHP)
-  console.log("API URL:", url);
-
-  try {
-    // EXACT headers as PHP version - no Bearer prefix
-    const headers = {
-      "Client-Service": "Appx",
-      "source": "website",
-      "Auth-Key": "appxapi",
-      "Authorization": TOKEN,  // Direct token without "Bearer"
-      "User-ID": USER_ID
-    };
-
-    console.log("Request Headers:", JSON.stringify(headers, null, 2));
-
-    const response = await fetch(url, {
-      method: "GET",
-      headers: headers,
-      // Add these options to match PHP cURL behavior
-      followRedirects: true,
-    });
-
-    // Log response status
-    console.log("HTTP Code:", response.status);
-
-    const text = await response.text();
-    
-    // Log response length (like PHP's strlen)
-    console.log("Response length:", text.length);
-
-    if (!response.ok) {
-      console.log("External API Error:", text);
-      return res.status(response.status).json({
-        error: "API failed",
-        details: text,
-      });
-    }
-
-    // Try to parse as JSON, if fails return as text
+// Helper function to read batches.json file
+const getBatchesData = () => {
     try {
-      const jsonData = JSON.parse(text);
-      res.json(jsonData);
-    } catch (e) {
-      // If not JSON, return as text
-      res.send(text);
+        const batchesPath = path.join(__dirname, 'batches.json');
+        const fileContent = fs.readFileSync(batchesPath, 'utf8');
+        return JSON.parse(fileContent);
+    } catch (error) {
+        console.error('Error reading batches.json:', error.message);
+        return null;
     }
+};
 
-  } catch (error) {
-    console.error("Server Error:", error.message);
-    res.status(500).json({ error: error.message });
-  }
+// Main API endpoint
+app.get('/api', async (req, res) => {
+    try {
+        const { action, courseid, subjectid, topicid, videoid, course_id, video_id } = req.query;
+
+        if (!action) {
+            return res.status(400).json({ error: 'Action parameter is required' });
+        }
+
+        // Handle batches action - local file
+        if (action === 'batches') {
+            const batchesData = getBatchesData();
+            if (batchesData) {
+                return res.json(batchesData);
+            } else {
+                return res.status(500).json({ 
+                    status: 500,
+                    msg: "Internal Server Error",
+                    error: "Could not read batches.json file" 
+                });
+            }
+        }
+
+        let apiUrl = `${BASE_URL}`;
+        let finalAction = action;
+
+        // Handle different action naming conventions
+        if (action === 'videoDetails') {
+            finalAction = 'video_details';
+        }
+
+        // Use course_id if courseid is not provided
+        const finalCourseId = courseid || course_id;
+        
+        // Use video_id if videoid is not provided
+        const finalVideoId = videoid || video_id;
+
+        // Construct URL based on action
+        switch(finalAction) {
+            case 'subjects':
+                if (!finalCourseId) {
+                    return res.status(400).json({ error: 'Course ID is required for subjects' });
+                }
+                apiUrl += `?mode=subjects&courseId=${finalCourseId}`;
+                break;
+                
+            case 'topics':
+                if (!finalCourseId || !subjectid) {
+                    return res.status(400).json({ error: 'Course ID and Subject ID are required for topics' });
+                }
+                apiUrl += `?mode=topics&courseId=${finalCourseId}&subjectId=${subjectid}`;
+                break;
+                
+            case 'classes':
+                if (!finalCourseId || !subjectid) {
+                    return res.status(400).json({ error: 'Course ID and Subject ID are required for classes' });
+                }
+                apiUrl += `?mode=topics&courseId=${finalCourseId}&subjectId=${subjectid}`;
+                break;
+                
+            case 'content':
+                if (!finalCourseId || !subjectid || !topicid) {
+                    return res.status(400).json({ error: 'Course ID, Subject ID, and Topic ID are required for content' });
+                }
+                apiUrl += `?mode=content&courseId=${finalCourseId}&subjectId=${subjectid}&topicId=${topicid}`;
+                break;
+                
+            case 'video_details':
+                if (!finalCourseId || !finalVideoId) {
+                    return res.status(400).json({ error: 'Course ID and Video ID are required for video details' });
+                }
+                apiUrl += `?mode=video_details&courseId=${finalCourseId}&videoId=${finalVideoId}`;
+                break;
+                
+            default:
+                return res.status(400).json({ error: 'Invalid action' });
+        }
+
+        // Make request to external API
+        console.log(`Fetching from: ${apiUrl}`);
+        const apiResponse = await axios.get(apiUrl);
+        
+        // Send the response exactly as received from the external API
+        res.json(apiResponse.data);
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            res.status(error.response.status).json(error.response.data);
+        } else if (error.request) {
+            // The request was made but no response was received
+            res.status(504).json({ 
+                status: 504,
+                msg: "Gateway Timeout",
+                error: "No response from external API" 
+            });
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            res.status(500).json({ 
+                status: 500,
+                msg: "Internal Server Error",
+                error: error.message 
+            });
+        }
+    }
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 200, 
+        msg: "Server is running",
+        timestamp: new Date().toISOString()
+    });
+});
+
+// Start server
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Available endpoints:`);
+    console.log(`  GET /api?action=batches - Get batches from local batches.json`);
+    console.log(`  GET /api?action=subjects&courseid=COURSE_ID`);
+    console.log(`  GET /api?action=topics&courseid=COURSE_ID&subjectid=SUBJECT_ID`);
+    console.log(`  GET /api?action=classes&courseid=COURSE_ID&subjectid=SUBJECT_ID`);
+    console.log(`  GET /api?action=content&courseid=COURSE_ID&subjectid=SUBJECT_ID&topicid=TOPIC_ID`);
+    console.log(`  GET /api?action=video_details&courseid=COURSE_ID&videoid=VIDEO_ID`);
+    console.log(`  GET /api?action=videoDetails&course_id=COURSE_ID&video_id=VIDEO_ID (also supported)`);
+    console.log(`  GET /health`);
 });
-
-
