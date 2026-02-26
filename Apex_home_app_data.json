@@ -1,0 +1,31 @@
+{
+  "status": "success",
+  "total_apps": 3,
+  "apps": [
+    {
+      "app_id": "1",
+      "app_title": "Testbook Premium Mod Apk",
+      "app_logo": "https://img.utdstc.com/icon/975/91f/97591f6a98980714588959fa0f8eb54aeef06fc957ca769f17baa120dbac07c9:200",
+      "app_version": "1.2.0",
+
+      "app_download_link": "https://t.me/ApkLit_Official"
+    },
+    {
+      "app_id": "2",
+      "app_title": "Selection Way Mod Apk",
+      "app_logo": "https://www.selectionway.com/next_images/logo.png",
+      "app_version": "2.5.1",
+
+      "app_download_link": "https://t.me/ApkLit_Official"
+    },
+       
+    {
+      "app_id": "3",
+      "app_title": "Rojgar With Ankit Mod Apk",
+      "app_logo": "https://play-lh.googleusercontent.com/4G0OEcvtfchQuBR9mxlyds2Q-tyDm9Z_rjj1W1cz0vC1O5qzCmntKxWM8YjYxytp538",
+      "app_version": "3.0.4",
+
+      "app_download_link": "https://t.me/ApkLit_Official"
+    }
+  ]
+}
