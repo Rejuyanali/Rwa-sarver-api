@@ -1,0 +1,72 @@
+{
+  "success": true,
+  "movie": {
+    "id": "3",
+    "title": "Made in Korea",
+    "video_type": "hls",
+    "duration": "1h 52m",
+    "release_year": "2026"
+  },
+  "streaming": {
+    "video_url": "https://s01.freecdn201.top/files/81754582/720p/720p.m3u8?in=c7e90373d585af3781382978ce406771::4a7b23504b081db894cb0f35a349015b::1773843084::ni",
+    "audio_url": "https://s01.freecdn200.top/files/81754582/a/5/5.m3u8",
+    "quality": "720p",
+    "language": "Portuguese"
+  },
+  "available_qualities": [
+    {
+      "id": "119",
+      "quality": "720p",
+      "url": "https://s01.freecdn201.top/files/81754582/720p/720p.m3u8?in=c7e90373d585af3781382978ce406771::4a7b23504b081db894cb0f35a349015b::1773843084::ni",
+      "bitrate": "Auto"
+    },
+    {
+      "id": "118",
+      "quality": "480p",
+      "url": "https://s01.freecdn201.top/files/81754582/480p/480p.m3u8?in=c7e90373d585af3781382978ce406771::4a7b23504b081db894cb0f35a349015b::1773843084::ni",
+      "bitrate": "Auto"
+    }
+  ],
+  "available_audio_languages": [
+    {
+      "id": "169",
+      "language": "Portuguese",
+      "url": "https://s01.freecdn200.top/files/81754582/a/5/5.m3u8"
+    },
+    {
+      "id": "168",
+      "language": "Malayalam",
+      "url": "https://s01.freecdn200.top/files/81754582/a/4/4.m3u8"
+    },
+    {
+      "id": "167",
+      "language": "Kannada",
+      "url": "https://s01.freecdn200.top/files/81754582/a/3/3.m3u8"
+    },
+    {
+      "id": "166",
+      "language": "Unknown",
+      "url": "https://s01.freecdn200.top/files/81754582/a/0/0.m3u8"
+    },
+    {
+      "id": "165",
+      "language": "French",
+      "url": "https://s01.freecdn200.top/files/81754582/a/1/1.m3u8"
+    },
+    {
+      "id": "164",
+      "language": "Hindi",
+      "url": "https://s01.freecdn200.top/files/81754582/a/2/2.m3u8"
+    },
+    {
+      "id": "163",
+      "language": "Telugu",
+      "url": "https://s01.freecdn200.top/files/81754582/a/7/7.m3u8"
+    },
+    {
+      "id": "170",
+      "language": "Tamil",
+      "url": "https://s01.freecdn200.top/files/81754582/a/6/6.m3u8"
+    }
+  ]
+}
